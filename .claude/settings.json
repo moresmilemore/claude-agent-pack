@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "agent": "orchestrator",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./**/*credentials*)",
+      "Read(./node_modules/**)",
+      "Read(./.turbo/**)",
+      "Read(./.cache/**)",
+      "Read(./.pytest_cache/**)",
+      "Read(./.mypy_cache/**)",
+      "Read(./.venv/**)",
+      "Read(./venv/**)",
+      "Read(./**/.DS_Store)"
+    ]
+  }
+}

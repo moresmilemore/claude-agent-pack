@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "imagemagick": {
+      "command": "uvx",
+      "args": ["mcp-server-imagemagick"],
+      "env": {
+        "MAGICK_OUTPUT_DIR": "./output"
+      },
+      "description": "Image processing backend for the photo agent. Exposes convert, identify, composite, mogrify, and montage as mcp__imagemagick__* tools. Requires ImageMagick 7+ installed on PATH."
+    },
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "env": {
+        "PLAYWRIGHT_HEADLESS": "true",
+        "PLAYWRIGHT_TIMEOUT": "30000"
+      },
+      "description": "Playwright browser backend for the researcher agent. Exposes navigate, screenshot, get_page_text, find, click, and form_input as mcp__browser__* tools. Playwright will download Chromium on first run."
+    }
+  }
+}

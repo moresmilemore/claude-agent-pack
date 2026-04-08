@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Custom Claude Code Agent Pack</title>
+    <meta
+      name="description"
+      content="Full-scale GitHub-style documentation for a custom Claude Code multi-agent system."
+    />
+    <style>
+      :root {
+        --bg: #f6f8fa;
+        --surface: #ffffff;
+        --surface-muted: #f6f8fa;
+        --surface-strong: #f0f3f6;
+        --text: #1f2328;
+        --muted: #59636e;
+        --border: #d0d7de;
+        --border-strong: #afb8c1;
+        --accent: #0969da;
+        --accent-soft: #ddf4ff;
+        --good: #1a7f37;
+        --good-soft: #dafbe1;
+        --warn: #9a6700;
+        --warn-soft: #fff8c5;
+        --shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+        --radius: 10px;
+        --radius-sm: 6px;
+        --content: 1280px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #f6f8fa 0%, #eef2f6 100%);
+        color: var(--text);
+        font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+          Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      code,
+      pre,
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+          "Liberation Mono", monospace;
+      }
+
+      .shell {
+        max-width: var(--content);
+        margin: 0 auto;
+        padding: 24px 20px 80px;
+      }
+
+      .repo-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+
+      .repo-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        backdrop-filter: blur(10px);
+      }
+
+      .hero {
+        background: radial-gradient(
+            circle at top right,
+            rgba(9, 105, 218, 0.08),
+            transparent 34%
+          ),
+          radial-gradient(
+            circle at left center,
+            rgba(26, 127, 55, 0.08),
+            transparent 30%
+          ),
+          var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 28px;
+        margin-bottom: 24px;
+      }
+
+      .hero h1 {
+        margin: 0 0 12px;
+        font-size: clamp(30px, 5vw, 42px);
+        line-height: 1.15;
+      }
+
+      .hero p {
+        margin: 0;
+        max-width: 820px;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 18px 0 0;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface-muted);
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .main {
+        min-width: 0;
+      }
+
+      .toc {
+        position: sticky;
+        top: 20px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .toc h2 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+
+      .toc a {
+        display: block;
+        padding: 6px 0;
+        color: var(--text);
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .readme {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .readme-head {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        padding: 16px 20px;
+        background: var(--surface-muted);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .readme-tabs {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        padding: 7px 12px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        color: var(--muted);
+      }
+
+      .tab.active {
+        color: var(--text);
+        background: var(--surface);
+        border-color: var(--border);
+        font-weight: 600;
+      }
+
+      .readme-body {
+        padding: 28px;
+      }
+
+      h2 {
+        margin: 34px 0 14px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+        font-size: 28px;
+      }
+
+      h3 {
+        margin: 24px 0 10px;
+        font-size: 20px;
+      }
+
+      h4 {
+        margin: 18px 0 8px;
+        font-size: 16px;
+      }
+
+      p,
+      ul,
+      ol,
+      table,
+      pre,
+      details,
+      .callout,
+      .stats,
+      .two-col,
+      .link-panel {
+        margin: 0 0 16px;
+      }
+
+      ul,
+      ol {
+        padding-left: 22px;
+      }
+
+      li + li {
+        margin-top: 6px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        display: block;
+        overflow-x: auto;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--border);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--surface-muted);
+      }
+
+      pre {
+        padding: 16px;
+        overflow: auto;
+        background: #f6f8fa;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      code {
+        padding: 0.14em 0.38em;
+        background: rgba(175, 184, 193, 0.2);
+        border-radius: 6px;
+        font-size: 0.95em;
+      }
+
+      pre code {
+        padding: 0;
+        background: transparent;
+      }
+
+      .callout {
+        padding: 14px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--surface-muted);
+      }
+
+      .callout strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .callout.good {
+        background: var(--good-soft);
+        border-color: #54ae6b;
+      }
+
+      .callout.warn {
+        background: var(--warn-soft);
+        border-color: #d4a72c;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .stat {
+        padding: 16px;
+        border-radius: 10px;
+        background: var(--surface-muted);
+        border: 1px solid var(--border);
+      }
+
+      .stat .value {
+        display: block;
+        font-size: 26px;
+        font-weight: 700;
+        line-height: 1.1;
+        margin-bottom: 4px;
+      }
+
+      .stat .label {
+        color: var(--muted);
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .link-panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .link-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface-muted);
+        padding: 14px 16px;
+      }
+
+      .link-card strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      details {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+        background: var(--surface-muted);
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .footer {
+        text-align: center;
+        color: var(--muted);
+        margin-top: 22px;
+        font-size: 13px;
+      }
+
+      @media (max-width: 1080px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .toc {
+          position: static;
+          order: -1;
+        }
+
+        .card-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 720px) {
+        .shell {
+          padding: 14px 12px 48px;
+        }
+
+        .hero,
+        .readme-body {
+          padding: 18px;
+        }
+
+        .card-grid,
+        .stats,
+        .two-col,
+        .link-panel {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="repo-bar">
+        <span class="repo-pill"><span class="mono">pat / agents</span></span>
+        <span class="repo-pill">Portable Claude Code system</span>
+        <span class="repo-pill">Audited and optimized</span>
+      </div>
+
+      <section class="hero">
+        <h1>Custom Claude Code Agent Pack</h1>
+        <p>
+          A full-scale, GitHub-style documentation page for a project-local
+          multi-agent system built around strict orchestration, narrow specialist
+          roles, scoped memory, token efficiency, and verifiable execution.
+        </p>
+        <div class="badge-row">
+          <span class="badge">10 specialists</span>
+          <span class="badge">Project-scoped memory</span>
+          <span class="badge">Huddle -> Work -> Debrief</span>
+          <span class="badge">Prompt-caching discipline</span>
+          <span class="badge">Image + browser MCP</span>
+        </div>
+      </section>
+
+      <div class="layout">
+        <main class="main">
+          <div class="card-grid">
+            <section class="card">
+              <h3>What this is</h3>
+              <p>
+                A repo-local operating system for Claude Code, not a library or
+                app. It packages prompts, rules, memory, runtime settings, and
+                MCP integrations into one portable setup.
+              </p>
+            </section>
+            <section class="card">
+              <h3>What changed</h3>
+              <p>
+                The latest audit tightened scope discipline, corrected
+                contradictory rules, relaxed over-broad deny rules, and aligned
+                docs, installer, and prompts.
+              </p>
+            </section>
+            <section class="card">
+              <h3>Why it matters</h3>
+              <p>
+                Claude Code behaves more like a real engineering team: separate
+                planning, coding, debugging, testing, review, research, and
+                asset work.
+              </p>
+            </section>
+            <section class="card">
+              <h3>Best fit</h3>
+              <p>
+                Multi-file work, guarded implementation, reusable project
+                context, and situations where review and verification matter
+                more than raw speed.
+              </p>
+            </section>
+          </div>
+
+          <article class="readme">
+            <div class="readme-head">
+              <div class="readme-tabs">
+                <span class="tab active">README</span>
+                <span class="tab">Code</span>
+                <span class="tab">Audit</span>
+                <span class="tab">Docs</span>
+              </div>
+              <div class="mono">docs/index.html</div>
+            </div>
+
+            <div class="readme-body">
+              <div class="callout good">
+                <strong>Current audit status</strong>
+                The system is now internally consistent and in a strong state:
+                the orchestrator is the default main-thread agent, specialists
+                work from compact handoff packets, search behavior is narrower by
+                default, and high-noise caches are blocked without preventing
+                legitimate build or coverage inspection.
+              </div>
+
+              <section id="overview">
+                <h2>Overview</h2>
+                <p>
+                  This repository is a portable multi-agent operating system for
+                  Claude Code. It is designed to make Claude behave like a small,
+                  disciplined team instead of one large generalist assistant.
+                </p>
+                <p>
+                  The pack combines agent prompts, runtime settings, memory
+                  layers, modular rules, and MCP integrations into one
+                  self-contained repo-level system that can travel with a
+                  project.
+                </p>
+                <div class="stats">
+                  <div class="stat">
+                    <span class="value">10</span>
+                    <span class="label">specialist agents</span>
+                  </div>
+                  <div class="stat">
+                    <span class="value">3</span>
+                    <span class="label">memory layers</span>
+                  </div>
+                  <div class="stat">
+                    <span class="value">2</span>
+                    <span class="label">MCP backends</span>
+                  </div>
+                </div>
+              </section>
+
+              <section id="tldr">
+                <h2>TL;DR</h2>
+                <ul>
+                  <li>
+                    <code>orchestrator</code> acts as the lead and is wired as
+                    the default main-thread agent.
+                  </li>
+                  <li>
+                    Specialists own planning, exploration, coding, debugging,
+                    testing, review, research, and photo work.
+                  </li>
+                  <li>
+                    Shared memory is project-scoped. Per-agent memory files were
+                    intentionally avoided to reduce drift and token waste.
+                  </li>
+                  <li>
+                    Compact handoff packets tell each agent exactly what it owns,
+                    what to inspect first, and what not to touch.
+                  </li>
+                  <li>
+                    The whole system is biased toward narrow scope, explicit
+                    evidence, and small deltas.
+                  </li>
+                </ul>
+              </section>
+
+              <section id="architecture">
+                <h2>System Architecture</h2>
+                <pre><code>User request
+    |
+    v
+orchestrator (main-thread lead)
+    |
+    v
+decompose task into scoped subtasks
+    |
+    v
+huddle with needed specialists
+    |
+    v
+dispatch compact HANDOFF_PACKETs
+    |
+    v
+specialists execute inside narrow scope
+    |
+    v
+review + debrief + verified memory update
+    |
+    v
+unified final answer</code></pre>
+
+                <div class="two-col">
+                  <div class="callout">
+                    <strong>Design principle</strong>
+                    The orchestrator does not implement. It manages work. That
+                    keeps role boundaries clean and makes delegation a real
+                    system behavior instead of a loose suggestion.
+                  </div>
+                  <div class="callout">
+                    <strong>Token principle</strong>
+                    Each agent starts from the smallest plausible context. Scope
+                    widens only when local evidence is insufficient, and that
+                    broadening should be explicit.
+                  </div>
+                </div>
+              </section>
+
+              <section id="audit">
+                <h2>What The Final Audit Changed</h2>
+                <h3>1. Fixed contradictory top-level rules</h3>
+                <p>
+                  One of the strongest corrections was in the permanent project
+                  guidance. The old wording implied agents only touched
+                  <code>MEMORY.md</code> and <code>.claude/**</code>, which was
+                  false for code edits, research output, and image output. The
+                  rule now correctly describes project-scoped work plus approved
+                  output folders.
+                </p>
+
+                <h3>2. Tightened search and research scope</h3>
+                <p>
+                  The explorer and researcher prompts were adjusted to start
+                  narrow, use the minimum useful search strategies, and widen
+                  only when the initial scope does not answer the question.
+                </p>
+
+                <h3>3. Reduced pointless token burn</h3>
+                <p>
+                  Huddles and debriefs are now explicitly concise. Shared
+                  summaries are short bullet briefs instead of transcript dumps,
+                  and task-local handoff packets replaced the idea of separate
+                  memory ledgers per agent.
+                </p>
+
+                <h3>4. Relaxed over-broad deny rules</h3>
+                <p>
+                  The permission model still blocks secrets and noisy caches, but
+                  it no longer hard-blocks all build or coverage artifacts. That
+                  means legitimate debugging and verification work can still
+                  inspect relevant outputs when needed.
+                </p>
+
+                <h3>5. Re-aligned installer and docs</h3>
+                <p>
+                  The validator, runtime settings, and README now agree with each
+                  other, which matters because drift between those layers causes
+                  subtle failures and bad assumptions later.
+                </p>
+              </section>
+
+              <section id="agents">
+                <h2>Agent Roster</h2>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Agent</th>
+                      <th>Model</th>
+                      <th>Purpose</th>
+                      <th>Core constraint</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>orchestrator</code></td>
+                      <td>opus</td>
+                      <td>Lead agent for decomposition, dispatch, synthesis</td>
+                      <td>Never implements directly</td>
+                    </tr>
+                    <tr>
+                      <td><code>architect</code></td>
+                      <td>opus</td>
+                      <td>Tradeoff analysis and strategic guidance</td>
+                      <td>Read-only</td>
+                    </tr>
+                    <tr>
+                      <td><code>reviewer</code></td>
+                      <td>opus</td>
+                      <td>Spec and quality gate before completion</td>
+                      <td>Read-only, no self-approval</td>
+                    </tr>
+                    <tr>
+                      <td><code>planner</code></td>
+                      <td>sonnet</td>
+                      <td>Turns vague requests into 3-6 verifiable steps</td>
+                      <td>No implementation</td>
+                    </tr>
+                    <tr>
+                      <td><code>explorer</code></td>
+                      <td>haiku</td>
+                      <td>Fast codebase mapper and relationship finder</td>
+                      <td>Start narrow, widen only if needed</td>
+                    </tr>
+                    <tr>
+                      <td><code>coder</code></td>
+                      <td>sonnet</td>
+                      <td>Minimal-diff implementation</td>
+                      <td>No scope creep</td>
+                    </tr>
+                    <tr>
+                      <td><code>debugger</code></td>
+                      <td>sonnet</td>
+                      <td>Reproduce, isolate, and fix root causes</td>
+                      <td>One hypothesis at a time</td>
+                    </tr>
+                    <tr>
+                      <td><code>test-engineer</code></td>
+                      <td>sonnet</td>
+                      <td>TDD, regression coverage, flaky-test cleanup</td>
+                      <td>One behavior per test</td>
+                    </tr>
+                    <tr>
+                      <td><code>photo</code></td>
+                      <td>sonnet</td>
+                      <td>ImageMagick-backed asset processing</td>
+                      <td>Never overwrite originals by default</td>
+                    </tr>
+                    <tr>
+                      <td><code>researcher</code></td>
+                      <td>sonnet</td>
+                      <td>External docs, live guidance, browser automation</td>
+                      <td>No speculation, cited sources only</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <section id="workflow">
+                <h2>Operating Workflow</h2>
+                <h3>1. Understand</h3>
+                <p>
+                  The orchestrator restates the goal, extracts measurable success
+                  criteria, and clarifies only when ambiguity is actually risky.
+                </p>
+
+                <h3>2. Decompose</h3>
+                <p>
+                  Work is broken into discrete subtasks with an owner, scope
+                  boundary, dependencies, acceptance criteria, and required
+                  inputs.
+                </p>
+
+                <h3>3. Huddle</h3>
+                <p>
+                  When multiple specialists are involved, they huddle before
+                  execution. The point is not ceremony. The point is to improve
+                  each other's plan before anyone starts spending tokens or
+                  editing files.
+                </p>
+
+                <h3>4. Parallel dispatch</h3>
+                <p>
+                  Independent work is dispatched in parallel. Serial execution is
+                  only acceptable when true dependencies exist.
+                </p>
+
+                <h3>5. Review and debrief</h3>
+                <p>
+                  Non-trivial implementation is reviewed before completion, then
+                  the participating agents do a short peer-aware debrief to
+                  capture missed risks and reusable lessons.
+                </p>
+              </section>
+
+              <section id="handoff">
+                <h2>Compact Handoff Packets</h2>
+                <p>
+                  Instead of separate memory files for every agent, this pack now
+                  uses compact task-local handoff packets. That gives each agent
+                  exactly the context it needs without loading stale notes from
+                  old work.
+                </p>
+                <pre><code>HANDOFF_PACKET
+- Task: what this agent owns
+- Why you: why this specialist is the owner
+- Initial scope: files / dirs / symbols / tests / errors
+- Inputs: what to use
+- Dependencies: what must already be true
+- Acceptance: what counts as done
+- Non-goals: what not to touch
+- Escalate if: when to ask for help or widen scope</code></pre>
+                <div class="callout good">
+                  <strong>Why this approach won</strong>
+                  Shared memory holds project facts. Agent prompts hold role
+                  responsibility. Handoff packets hold task-local context. That
+                  split is leaner and more reliable than one memory ledger per
+                  specialist.
+                </div>
+              </section>
+
+              <section id="memory">
+                <h2>Memory Architecture</h2>
+                <h3>Layer 1: <code>CLAUDE.md</code></h3>
+                <p>
+                  Permanent operating rules: roster, tool silos, runtime
+                  expectations, prompt-caching discipline, workflow rules, and
+                  project-wide conventions.
+                </p>
+
+                <h3>Layer 2: <code>MEMORY.md</code></h3>
+                <p>
+                  An append-only pointer index for durable technical decisions,
+                  bug patterns, quirks, and reusable findings. It is intentionally
+                  short and structured.
+                </p>
+                <pre><code>[YYYY-MM-DD] [agent] [TYPE] - [insight] -> [pointer]</code></pre>
+
+                <h3>Layer 3: <code>.claude/rules/*.md</code></h3>
+                <p>
+                  Situational rule files loaded only when relevant. This keeps
+                  persistent context smaller and avoids stuffing every task with
+                  every possible rule.
+                </p>
+              </section>
+
+              <section id="efficiency">
+                <h2>Efficiency Model</h2>
+                <h3>Prompt-caching discipline</h3>
+                <ul>
+                  <li>Batch reads up front.</li>
+                  <li>Keep read order stable for cache reuse.</li>
+                  <li>Prefer native reads over shell dumps.</li>
+                  <li>Reuse the same specialist across related work when helpful.</li>
+                </ul>
+
+                <h3>Scope-first discovery</h3>
+                <ul>
+                  <li>
+                    Agents begin with directly connected files, symbols, callers,
+                    tests, errors, and imports.
+                  </li>
+                  <li>
+                    Broader scans are a fallback, not the default.
+                  </li>
+                  <li>
+                    Search agents stop once the answer is well-supported instead
+                    of doing extra passes for their own sake.
+                  </li>
+                </ul>
+
+                <h3>Lean coordination</h3>
+                <ul>
+                  <li>Only huddle with agents that can materially help.</li>
+                  <li>Use short briefs, not raw transcript reposts.</li>
+                  <li>Skip repeated peer loops once feedback converges.</li>
+                </ul>
+              </section>
+
+              <section id="settings">
+                <h2>Runtime Settings</h2>
+                <p>
+                  The repo-level <code>.claude/settings.json</code> does more
+                  than pick a default agent. It enforces the runtime posture of
+                  the pack.
+                </p>
+                <ul>
+                  <li>
+                    Sets <code>orchestrator</code> as the default main-thread
+                    agent.
+                  </li>
+                  <li>
+                    Denies access to secrets and common noise sources like
+                    <code>node_modules</code>, virtualenv caches,
+                    <code>.cache</code>, <code>.turbo</code>, and
+                    <code>.DS_Store</code>.
+                  </li>
+                  <li>
+                    Still allows task-relevant build or coverage artifacts when a
+                    real debugging or validation task needs them.
+                  </li>
+                </ul>
+                <div class="callout warn">
+                  <strong>Important tradeoff</strong>
+                  A deny list that is too broad saves tokens but can break real
+                  work. The final audit intentionally removed hard blocks on
+                  general build and coverage paths.
+                </div>
+              </section>
+
+              <section id="mcp">
+                <h2>MCP Integrations</h2>
+                <h3>ImageMagick MCP</h3>
+                <ul>
+                  <li>Used by <code>photo</code>.</li>
+                  <li>Launched with <code>uvx mcp-server-imagemagick</code>.</li>
+                  <li>Writes into <code>./output</code> by default.</li>
+                  <li>Portable now that it does not hardcode one machine path.</li>
+                </ul>
+
+                <h3>Playwright MCP</h3>
+                <ul>
+                  <li>Used by <code>researcher</code>.</li>
+                  <li>Launched with <code>npx -y @playwright/mcp@latest</code>.</li>
+                  <li>Headless with a 30-second timeout.</li>
+                  <li>
+                    Lets the research agent handle JS-heavy docs and websites.
+                  </li>
+                </ul>
+              </section>
+
+              <section id="installer">
+                <h2>Installer And Validation</h2>
+                <p>
+                  <code>install.sh</code> is both a bootstrap script and a pack
+                  validator. It checks:
+                </p>
+                <ul>
+                  <li>required file layout</li>
+                  <li>JSON validity for runtime and MCP config</li>
+                  <li>agent frontmatter invariants</li>
+                  <li>runtime settings invariants</li>
+                  <li>ImageMagick availability</li>
+                  <li><code>uvx</code> availability</li>
+                  <li>Node and <code>npx</code> availability</li>
+                </ul>
+                <pre><code>unzip -o agents.zip
+./install.sh</code></pre>
+              </section>
+
+              <section id="flows">
+                <h2>Example Request Flows</h2>
+                <h3>Feature work</h3>
+                <ol>
+                  <li>Orchestrator receives the request.</li>
+                  <li>Planner and explorer help define scope if needed.</li>
+                  <li>Specialists huddle.</li>
+                  <li>Coder implements with a minimal diff.</li>
+                  <li>Test engineer validates behavior.</li>
+                  <li>Reviewer gates the change.</li>
+                  <li>Orchestrator debriefs and synthesizes the result.</li>
+                </ol>
+
+                <h3>Bug fix</h3>
+                <ol>
+                  <li>Debugger reproduces first.</li>
+                  <li>Root cause is isolated one hypothesis at a time.</li>
+                  <li>Minimal fix is applied.</li>
+                  <li>Regression coverage is checked.</li>
+                  <li>Reviewer signs off.</li>
+                </ol>
+
+                <h3>Research-backed implementation</h3>
+                <ol>
+                  <li>Researcher answers the exact external question.</li>
+                  <li>Results are saved into <code>./research/</code> if large.</li>
+                  <li>Coder or architect uses the researched answer.</li>
+                  <li>Reviewer verifies the implementation still matches intent.</li>
+                </ol>
+              </section>
+
+              <section id="strengths">
+                <h2>What This Pack Does Well</h2>
+                <ul>
+                  <li>Creates real specialization instead of cosmetic agent names.</li>
+                  <li>Makes review and verification part of the default path.</li>
+                  <li>Keeps memory local to the project.</li>
+                  <li>Encodes token discipline directly into prompts.</li>
+                  <li>Stays portable because the important behavior lives in-repo.</li>
+                </ul>
+              </section>
+
+              <section id="limits">
+                <h2>Assumptions And Limits</h2>
+                <ul>
+                  <li>This is designed for Claude Code, not generic chat tools.</li>
+                  <li>
+                    The pack depends on actual agent delegation support and the
+                    needed MCP backends being installed.
+                  </li>
+                  <li>
+                    The bottom of <code>CLAUDE.md</code> still expects project
+                    stack conventions to be filled in for each specific repo.
+                  </li>
+                  <li>
+                    Static auditing is strong, but live multi-agent runs are
+                    still the best way to observe practical token behavior over
+                    time.
+                  </li>
+                </ul>
+              </section>
+
+              <section id="customize">
+                <h2>How To Customize It</h2>
+                <ul>
+                  <li>Fill in project-specific stack conventions in <code>CLAUDE.md</code>.</li>
+                  <li>Add real lessons to <code>MEMORY.md</code> as work completes.</li>
+                  <li>Extend <code>.claude/rules/</code> for language or framework specifics.</li>
+                  <li>Adjust MCP backends if better servers exist for your workflow.</li>
+                  <li>
+                    Preserve the operating model even if you tune individual
+                    prompts.
+                  </li>
+                </ul>
+              </section>
+
+              <section id="files">
+                <h2>Important Files</h2>
+                <div class="link-panel">
+                  <a class="link-card" href="../README.md">
+                    <strong>README.md</strong>
+                    Top-level project explainer
+                  </a>
+                  <a class="link-card" href="../CLAUDE.md">
+                    <strong>CLAUDE.md</strong>
+                    Permanent operating rules
+                  </a>
+                  <a class="link-card" href="../MEMORY.md">
+                    <strong>MEMORY.md</strong>
+                    Project pointer index
+                  </a>
+                  <a class="link-card" href="../.claude/settings.json">
+                    <strong>.claude/settings.json</strong>
+                    Runtime defaults and deny rules
+                  </a>
+                  <a class="link-card" href="../install.sh">
+                    <strong>install.sh</strong>
+                    Bootstrap and validation script
+                  </a>
+                  <a class="link-card" href="../.mcp.json">
+                    <strong>.mcp.json</strong>
+                    MCP server definitions
+                  </a>
+                </div>
+              </section>
+
+              <section id="quickstart">
+                <h2>Quick Start</h2>
+                <pre><code>unzip -o agents.zip
+./install.sh</code></pre>
+                <p>
+                  Then restart Claude Code in the target project so it reloads
+                  the repo-level agents, rules, settings, and MCP configuration.
+                  For non-trivial work, start with <code>orchestrator</code>.
+                </p>
+              </section>
+
+              <section id="bottom-line">
+                <h2>Bottom Line</h2>
+                <p>
+                  What makes this project interesting is not just that it has
+                  multiple agents. It is that each one has a clear job, a narrow
+                  tool boundary, explicit success criteria, and a shared operating
+                  model built to reduce improvisation.
+                </p>
+                <p>
+                  After the final audit, the pack is also cleaner in the places
+                  that matter most: truthful rules, narrower discovery behavior,
+                  safer runtime guardrails, and less wasted context.
+                </p>
+              </section>
+
+              <details>
+                <summary>Open raw repository structure</summary>
+                <pre><code>.
+|-- CLAUDE.md
+|-- MEMORY.md
+|-- README.md
+|-- install.sh
+|-- .mcp.json
+|-- docs/
+|   `-- index.html
+`-- .claude/
+    |-- agents/
+    |   |-- architect.md
+    |   |-- coder.md
+    |   |-- debugger.md
+    |   |-- explorer.md
+    |   |-- orchestrator.md
+    |   |-- photo.md
+    |   |-- planner.md
+    |   |-- researcher.md
+    |   |-- reviewer.md
+    |   `-- test-engineer.md
+    |-- rules/
+    |   |-- LESSONS.md
+    |   |-- code-style.md
+    |   |-- security.md
+    |   |-- testing.md
+    |   `-- ui-style.md
+    `-- settings.json</code></pre>
+              </details>
+            </div>
+          </article>
+
+          <div class="footer">
+            Built as a self-contained static HTML page for local viewing or
+            GitHub Pages-style publishing from <span class="mono">docs/</span>.
+          </div>
+        </main>
+
+        <aside class="toc">
+          <h2>On This Page</h2>
+          <a href="#overview">Overview</a>
+          <a href="#tldr">TL;DR</a>
+          <a href="#architecture">System Architecture</a>
+          <a href="#audit">Final Audit</a>
+          <a href="#agents">Agent Roster</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#handoff">Handoff Packets</a>
+          <a href="#memory">Memory Architecture</a>
+          <a href="#efficiency">Efficiency Model</a>
+          <a href="#settings">Runtime Settings</a>
+          <a href="#mcp">MCP Integrations</a>
+          <a href="#installer">Installer</a>
+          <a href="#flows">Request Flows</a>
+          <a href="#strengths">Strengths</a>
+          <a href="#limits">Limits</a>
+          <a href="#customize">Customization</a>
+          <a href="#files">Important Files</a>
+          <a href="#quickstart">Quick Start</a>
+          <a href="#bottom-line">Bottom Line</a>
+        </aside>
+      </div>
+    </div>
+  </body>
+</html>
